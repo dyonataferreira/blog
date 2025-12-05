@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmar Exclusão - Meu Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d2d2d 0%, #3d3d3d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .warning-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #dc3545;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .post-title {
+            color: #1a3a52;
+            font-size: 22px;
+            font-weight: 600;
+            margin: 25px 0;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            word-break: break-word;
+        }
+
+        .warning-text {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        button[type="submit"],
+        .btn-cancel {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            gap: 8px;
+        }
+
+        button[type="submit"] {
+            background: #dc3545;
+            color: white;
+        }
+
+        button[type="submit"]:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-cancel {
+            background: #1a3a52;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-cancel:hover {
+            background: #153345;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 58, 82, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .post-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="warning-icon">⚠️</div>
+        
+        <h1>Confirmar Exclusão</h1>
+        
+        <p class="warning-text">Você está prestes a deletar o post:</p>
+        
+        <div class="post-title">{{ post.title }}</div>
+        
+        <p class="warning-text">Esta ação é irreversível. Tem certeza que deseja continuar?</p>
+
+        <div class="button-group">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit">🗑️ Sim, deletar permanentemente</button>
+            </form>
+            <a href="{% url 'posts:post_detail' post.id %}" class="btn-cancel">← Cancelar</a>
+        </div>
+    </div>
+</body>
+</html>
