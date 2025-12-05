@@ -6,7 +6,8 @@ from .models import Post
 # LISTAR
 def post_list(request):
     posts = Post.objects.all().order_by('-created_at')
-    return render(request, 'post_list.html', {'posts': posts})
+    return render(request, 'posts/post_list.html', {'posts': posts})
+
 
 # DETALHE
 def post_detail(request, pk):
