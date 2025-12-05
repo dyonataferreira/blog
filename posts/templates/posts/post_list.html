@@ -1,2 +1,253 @@
-<h1>Meu primeiro blog</h1>
-<p>O Django está funcionando!</p>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Blog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f3ed;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a3a52 0%, #2d5a7b 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 16px;
+            opacity: 0.95;
+            margin-bottom: 20px;
+        }
+
+        .btn-create {
+            display: inline-block;
+            background: white;
+            color: #1a3a52;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .posts-grid {
+            display: grid;
+            gap: 25px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid #1a3a52;
+        }
+
+        .post-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .post-header {
+            margin-bottom: 15px;
+        }
+
+        .post-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+            text-decoration: none;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .post-title:hover {
+            color: #1a3a52;
+        }
+
+        .post-meta {
+            font-size: 13px;
+            color: #999;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .post-meta::before {
+            content: "📅";
+            margin-right: 4px;
+        }
+
+        .post-content {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-view {
+            background: #1a3a52;
+            color: white;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-view:hover {
+            background: #153345;
+        }
+
+        .btn-edit {
+            background: #f0ad4e;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #ec971f;
+        }
+
+        .btn-delete {
+            background: #d9534f;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c9302c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state h2 {
+            color: #999;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .empty-state p {
+            color: #bbb;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 28px;
+            }
+
+            .post-card {
+                padding: 20px;
+            }
+
+            .post-title {
+                font-size: 20px;
+            }
+
+            .post-actions {
+                flex-direction: column;
+            }
+
+            .btn-view {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📝 Meu Blog</h1>
+        <p>Compartilhe seus pensamentos e ideias com o mundo</p>
+        <a href="{% url 'posts:post_create' %}" class="btn-create">✨ Escrever novo post</a>
+    </header>
+
+    <div class="container">
+        {% if posts %}
+            <div class="posts-grid">
+                {% for post in posts %}
+                    <article class="post-card">
+                        <div class="post-header">
+                            <a href="{% url 'posts:post_detail' post.pk %}" class="post-title">{{ post.title }}</a>
+                            <div class="post-meta">
+                                {{ post.created_at|date:"d/m/Y \à\s H:i" }}
+                            </div>
+                        </div>
+                        
+                        <div class="post-content">
+                            {{ post.content|truncatewords:50|safe }}
+                        </div>
+                        
+                        <div class="post-actions">
+                            <a href="{% url 'posts:post_detail' post.pk %}" class="btn btn-view">👁️ Ver Post</a>
+                            <a href="{% url 'posts:post_edit' post.pk %}" class="btn btn-edit">✏️ Editar</a>
+                            <a href="{% url 'posts:post_delete' post.pk %}" class="btn btn-delete">🗑️ Deletar</a>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h2>Ainda não há posts</h2>
+                <p>Seja o primeiro a compartilhar suas ideias!</p>
+                <a href="{% url 'posts:post_create' %}" class="btn-create">✨ Escrever primeiro post</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
+
