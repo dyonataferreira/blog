@@ -1,5 +1,5 @@
 django-ckeditor
-Django==3.2
+Django==6.0
 gunicorn
 whitenoise
 dj-database-url
