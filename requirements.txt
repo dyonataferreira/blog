@@ -1,1 +1,6 @@
 django-ckeditor
+Django==3.2
+gunicorn
+whitenoise
+dj-database-url
+psycopg2-binary
