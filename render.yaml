@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: lab2-blog-web
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: gunicorn blog.wsgi --log-file -
+    envVars:
+      - key: SECRET_KEY
+        value: ""
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: DATABASE_URL
+        value: ""
