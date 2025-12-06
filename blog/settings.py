@@ -38,10 +38,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('Q1jUSURhk5Ht9sy1I4bmzhGom8-iQg0mXoq7KrWVzy3GlvO77PXsdyf7men4ryPK8U0', 'django-insecure-CMpoY51wY88XWRLAV1evwNIpJ1jDm_UjQtPxZYyXZEL9eRI3g0RUS4FCuB0nkpUWtdg')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'False'
 
 # Hosts - in Render set environment variable ALLOWED_HOSTS to a comma-separated list
-ALLOWED_HOSTS = ['blog-ji7d.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
