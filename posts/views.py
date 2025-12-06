@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
+from django.http import Http404
 
-from .models import Post, Comment
+from .models import Post, Comment, Category
 from .forms import PostForm, CommentForm
 from django.conf import settings
 from django.http import JsonResponse
@@ -10,32 +11,88 @@ from django.views.decorators.http import require_POST
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import os
+import re
+
+def extract_thumbnail(content):
+    """Extrai URL da primeira imagem do conteúdo HTML"""
+    if not content:
+        return None
+    img_re = re.compile(r'<img[^>]+src=["\']([^"\']+)["\']', flags=re.IGNORECASE)
+    media_re = re.compile(r'(?:https?:)?//[^/]+(/media/[^"\'\s>]+)|(/media/[^"\'\s>]+)')
+    
+    m = img_re.search(content)
+    if m:
+        return m.group(1)
+    
+    m2 = media_re.search(content)
+    if m2:
+        return m2.group(1) or m2.group(2)
+    
+    return None
+
+def get_posts_with_preview(posts):
+    """Retorna posts com thumbnails extraídos"""
+    posts_with_preview = []
+    for p in posts:
+        preview = extract_thumbnail(p.content)
+        posts_with_preview.append({'post': p, 'thumb': preview})
+    return posts_with_preview
 
 # LISTAR
 def post_list(request):
-    posts = Post.objects.all().order_by('-created_at')
-    # extrair imagem de preview do conteúdo (primeira <img src=...>)
-    import re
-    posts_with_preview = []
-    img_re = re.compile(r'<img[^>]+src=["\']([^"\']+)["\']', flags=re.IGNORECASE)
-    media_re = re.compile(r'(?:https?:)?//[^/]+(/media/[^"\'\s>]+)|(/media/[^"\'\s>]+)')
-    for p in posts:
-        preview = None
-        if p.content:
-            m = img_re.search(p.content)
-            if m:
-                preview = m.group(1)
-            else:
-                # procurar referência direta a /media/arquivo
-                m2 = media_re.search(p.content)
-                if m2:
-                    preview = m2.group(1) or m2.group(2)
-        posts_with_preview.append({'post': p, 'thumb': preview})
-    return render(request, 'posts/post_list.html', {'posts_with_preview': posts_with_preview})
+    sort = request.GET.get('sort', '-created_at')
+    
+    # Validar tipo de ordenação
+    if sort not in ['-created_at', 'created_at']:
+        sort = '-created_at'
+    
+    posts = Post.objects.all().order_by(sort)
+    posts_with_preview = get_posts_with_preview(posts)
+    
+    # Obter categorias que têm posts
+    from django.db.models import Count
+    categories = Category.objects.annotate(
+        post_count=Count('posts')
+    ).filter(post_count__gte=1).order_by('name')
+    
+    return render(request, 'posts/post_list.html', {
+        'posts_with_preview': posts_with_preview,
+        'categories': categories,
+        'sort': sort
+    })
+
+# LISTAR POR CATEGORIA
+def category_list(request, slug):
+    category = get_object_or_404(Category, slug=slug)
+    sort = request.GET.get('sort', '-created_at')
+    
+    # Validar tipo de ordenação
+    if sort not in ['-created_at', 'created_at']:
+        sort = '-created_at'
+    
+    posts = category.posts.all().order_by(sort)
+    posts_with_preview = get_posts_with_preview(posts)
+    
+    # Obter categorias que têm posts
+    from django.db.models import Count
+    categories = Category.objects.annotate(
+        post_count=Count('posts')
+    ).filter(post_count__gte=1).order_by('name')
+    
+    return render(request, 'posts/post_list.html', {
+        'posts_with_preview': posts_with_preview,
+        'categories': categories,
+        'current_category': category,
+        'sort': sort
+    })
 
 # DETALHE
 def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
+    try:
+        post = Post.objects.get(pk=pk)
+    except Post.DoesNotExist:
+        raise Http404("Post não encontrado")
+    
     comments = post.comments.all()
     form = CommentForm()
     

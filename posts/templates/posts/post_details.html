@@ -64,12 +64,33 @@
             border-bottom: 2px solid #f0f0f0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         .post-meta::before {
             content: "📅";
             font-size: 18px;
+        }
+
+        .post-category {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .post-category a {
+            color: #1a3a52;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .post-category a:hover {
+            text-decoration: underline;
         }
 
         .post-content {
@@ -290,6 +311,11 @@
             
             <div class="post-meta">
                 {{ post.created_at|date:"d/m/Y \à\s H:i" }}
+                {% if post.category %}
+                <div class="post-category">
+                    📂 <a href="{% url 'posts:category_list' post.category.slug %}">{{ post.category.name }}</a>
+                </div>
+                {% endif %}
             </div>
 
             <div class="post-content">

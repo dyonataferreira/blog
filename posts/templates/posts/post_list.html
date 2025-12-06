@@ -56,9 +56,72 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .categories-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f0f0f0;
+            color: #333;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .category-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .category-btn.active {
+            background: #1a3a52;
+            color: white;
+            border-color: #1a3a52;
+        }
+
+        .sort-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .sort-controls label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sort-select:hover {
+            border-color: #1a3a52;
         }
 
         .posts-grid {
@@ -136,13 +199,35 @@
             font-size: 13px;
             color: #999;
             display: flex;
-            gap: 15px;
+            gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .post-meta::before {
             content: "📅";
             margin-right: 4px;
+        }
+
+        .post-category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #1a3a52;
+        }
+
+        .post-category-badge a {
+            color: #1a3a52;
+            text-decoration: none;
+        }
+
+        .post-category-badge a:hover {
+            text-decoration: underline;
         }
 
         .post-content {
@@ -276,6 +361,37 @@
     </header>
 
     <div class="container">
+        {% if current_category %}
+        <h2 style="margin-bottom: 20px; color: #1a3a52;">📂 {{ current_category.name }}</h2>
+        {% endif %}
+
+        <div class="controls">
+            {% if categories %}
+            <div class="categories-list">
+                <a href="{% url 'posts:post_list' %}" class="category-btn {% if not current_category %}active{% endif %}">Todos</a>
+                {% for cat in categories %}
+                <a href="{% url 'posts:category_list' cat.slug %}" class="category-btn {% if current_category.id == cat.id %}active{% endif %}">{{ cat.name }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="sort-controls">
+                <label for="sort">Ordenar por:</label>
+                <select id="sort" class="sort-select" onchange="changeSortOrder(this.value)">
+                    <option value="-created_at" {% if sort == '-created_at' %}selected{% endif %}>Mais recentes</option>
+                    <option value="created_at" {% if sort == 'created_at' %}selected{% endif %}>Mais antigos</option>
+                </select>
+            </div>
+        </div>
+
+        <script>
+            function changeSortOrder(value) {
+                const url = new URL(window.location);
+                url.searchParams.set('sort', value);
+                window.location = url.toString();
+            }
+        </script>
+
         {% if posts_with_preview %}
             <div class="posts-grid">
                 {% for item in posts_with_preview %}
@@ -295,6 +411,11 @@
                             <a href="{% url 'posts:post_detail' post.pk %}" class="post-title">{{ post.title }}</a>
                             <div class="post-meta">
                                 {{ post.created_at|date:"d/m/Y \à\s H:i" }}
+                                {% if post.category %}
+                                <span class="post-category-badge">
+                                    📂 <a href="{% url 'posts:category_list' post.category.slug %}">{{ post.category.name }}</a>
+                                </span>
+                                {% endif %}
                             </div>
                         </div>
                         
