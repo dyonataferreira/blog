@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% if post %}Editar{% else %}Criar{% endif %} Post - Meu Blog</title>
+    {{ form.media }}
     <style>
         * {
             margin: 0;
@@ -150,24 +151,97 @@
     <div class="container">
         <h1>{% if post %}Editar{% else %}Criar{% endif %} Post</h1>
         
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="title">Título</label>
-                <input type="text" id="title" name="title" value="{{ post.title|default:'' }}" required placeholder="Digite o título do seu post">
-            </div>
-
-            <div class="form-group">
-                <label for="content">Conteúdo</label>
-                <textarea id="content" name="content" required placeholder="Escreva o conteúdo do seu post aqui...">{{ post.content|default:'' }}</textarea>
-            </div>
-
+            {{ form.as_p }}
+            <input type="file" id="imgUpload" accept="image/*" style="display:none">
+            <button type="button" id="btnAddImage" style="margin-bottom:15px;background:#ffe066;color:#333;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;">Adicionar Imagem 📷</button>
             <div class="button-group">
                 <button type="submit">💾 Salvar Post</button>
                 <a href="{% url 'posts:post_list' %}" class="btn-cancel">✕ Cancelar</a>
             </div>
         </form>
+        <script>
+        (function(){
+            const uploadUrl = "{% url 'posts:upload_image' %}";
+
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            function insertImageToEditor(imageUrl) {
+                const imgTag = '<img src="' + imageUrl + '" style="max-width:100%;">';
+
+                // Prefer inserting into a CKEditor instance if available.
+                if (window.CKEDITOR) {
+                    // Try to use the standard id first, otherwise use the first available instance.
+                    let instance = CKEDITOR.instances['id_content'];
+                    if (!instance) {
+                        const keys = Object.keys(CKEDITOR.instances || {});
+                        if (keys.length) instance = CKEDITOR.instances[keys[0]];
+                    }
+
+                    if (instance && typeof instance.insertHtml === 'function') {
+                        instance.insertHtml(imgTag);
+                        return;
+                    }
+
+                    // If CKEditor exists but instance not yet ready, wait briefly and retry.
+                    if (!instance && CKEDITOR.on) {
+                        CKEDITOR.on('instanceReady', function(ev) {
+                            try { ev.editor.insertHtml(imgTag); } catch (e) {}
+                        });
+                        return;
+                    }
+                }
+
+                // Fallback: append URL to textarea value so at least the image URL is stored.
+                const ta = document.getElementById('id_content');
+                if (ta) ta.value += '\n' + imageUrl + '\n';
+            }
+
+            async function uploadAndInsert(file) {
+                const formData = new FormData();
+                formData.append('image', file);
+                const csrftoken = getCookie('csrftoken');
+                const res = await fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: formData
+                });
+                if (!res.ok) {
+                    alert('Erro ao enviar a imagem');
+                    return;
+                }
+                const data = await res.json();
+                if (data.url) insertImageToEditor(data.url);
+            }
+
+            document.getElementById('btnAddImage').addEventListener('click', function(){
+                document.getElementById('imgUpload').click();
+            });
+
+            document.getElementById('imgUpload').addEventListener('change', function(e){
+                const file = e.target.files[0];
+                if (!file) return;
+                uploadAndInsert(file);
+                e.target.value = '';
+            });
+        })();
+        </script>
     </div>
 </body>
 </html>

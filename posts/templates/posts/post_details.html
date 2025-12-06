@@ -20,19 +20,18 @@
 
         .back-button {
             display: inline-block;
-            padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 18px;
+            background: #1a3a52;
             color: white;
             text-decoration: none;
             font-weight: 600;
             margin: 20px;
             border-radius: 6px;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
         }
 
         .back-button:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: #153345;
             transform: translateX(-3px);
         }
 
@@ -135,8 +134,131 @@
             transform: translateY(-2px);
         }
 
+        .comments-section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .comments-section h2 {
+            color: #1a3a52;
+            font-size: 24px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .comments-list {
+            margin-bottom: 40px;
+        }
+
+        .comment {
+            background: #f9f9f9;
+            border-left: 4px solid #1a3a52;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .comment-name {
+            font-weight: 700;
+            color: #1a3a52;
+            font-size: 15px;
+            margin-bottom: 5px;
+        }
+
+        .comment-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .comment-text {
+            color: #666;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+
+        .comment-empty {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .comment-form {
+            background: #f5f3ed;
+            padding: 25px;
+            border-radius: 8px;
+        }
+
+        .comment-form h3 {
+            color: #1a3a52;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1a3a52;
+            box-shadow: 0 0 0 3px rgba(26, 58, 82, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            background: #1a3a52;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-submit:hover {
+            background: #153345;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 58, 82, 0.2);
+        }
+
         @media (max-width: 600px) {
             .post-card {
+                padding: 25px;
+            }
+
+            .comments-section {
                 padding: 25px;
             }
 
@@ -179,6 +301,40 @@
                 <a href="{% url 'posts:post_delete' post.pk %}" class="btn btn-delete">🗑️ Remover</a>
             </div>
         </article>
+
+        <section class="comments-section">
+            <h2>💬 Comentários</h2>
+
+            {% if comments %}
+            <div class="comments-list">
+                {% for comment in comments %}
+                <div class="comment">
+                    <div class="comment-name">{{ comment.name }}</div>
+                    <div class="comment-date">{{ comment.created_at|date:"d/m/Y \à\s H:i" }}</div>
+                    <div class="comment-text">{{ comment.content|linebreaks }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="comment-empty">Ainda não há comentários. Seja o primeiro a comentar!</div>
+            {% endif %}
+
+            <div class="comment-form">
+                <h3>Deixe um comentário</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.content.id_for_label }}">{{ form.content.label }}</label>
+                        {{ form.content }}
+                    </div>
+                    <button type="submit" class="btn-submit">Enviar comentário</button>
+                </form>
+            </div>
+        </section>
     </div>
 </body>
 </html>

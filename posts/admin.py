@@ -1,8 +1,23 @@
+
 from django.contrib import admin
-from .models import Post
+from .models import Post, Comment
+from ckeditor.widgets import CKEditorWidget
+from django import forms
 
-admin.site.register(Post)
+class PostAdminForm(forms.ModelForm):
+	content = forms.CharField(widget=CKEditorWidget())
 
-# dyonata
-# dyonata.py@gmail.com
-# 86131406
+	class Meta:
+		model = Post
+		fields = '__all__'
+
+class PostAdmin(admin.ModelAdmin):
+	form = PostAdminForm
+
+class CommentAdmin(admin.ModelAdmin):
+	list_display = ['name', 'post', 'created_at']
+	list_filter = ['created_at', 'post']
+	search_fields = ['name', 'content']
+
+admin.site.register(Post, PostAdmin)
+admin.site.register(Comment, CommentAdmin)
